@@ -9,4 +9,4 @@ JavaScript
 Firebase
 
 Live Website
-https://mutualdreamers.web.app
+https://mutual-dreamers.web.app
