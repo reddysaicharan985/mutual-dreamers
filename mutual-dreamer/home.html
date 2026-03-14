@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dream Feed</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h3>🌙 Menu</h3>
+
+        <a href="home.html">🏠 Home</a>
+        <a href="#">💭 Dreams</a>
+        <a href="#">🤝 Connections</a>
+        <a href="#">🔍 Search</a>
+        <a href="create.html">➕ Create</a>
+        <a href="#">👤 Profile</a>
+        <a href="#">🤖 Dream Bot</a>
+    </aside>
+
+    <!-- Feed -->
+    <main class="feed"></main>
+
+</div>
+
+
+<script>
+const feed = document.querySelector(".feed");
+
+/* Safe load */
+let dreams = JSON.parse(localStorage.getItem("dreams"));
+
+if (!dreams) {
+    dreams = [];
+    localStorage.setItem("dreams", JSON.stringify(dreams));
+}
+
+/* Save */
+function saveDreams() {
+    localStorage.setItem("dreams", JSON.stringify(dreams));
+}
+
+/* Like */
+function likeDream(i) {
+    dreams[i].likes++;
+    saveDreams();
+    renderDreams();
+}
+
+/* Comment */
+function addComment(i) {
+    const input = document.getElementById("comment-input-" + i);
+    const text = input.value.trim();
+    if (!text) return;
+
+    dreams[i].comments.push(text);
+    saveDreams();
+    renderDreams();
+}
+
+/* Render */
+function renderDreams() {
+
+    feed.innerHTML = "";
+
+    if (dreams.length === 0) {
+        feed.innerHTML = "<h3>No dreams yet… create your first dream ✨</h3>";
+        return;
+    }
+
+    dreams.forEach((dream, index) => {
+
+        const card = document.createElement("div");
+        card.className = "dream-card";
+
+        let commentsHTML = "";
+        (dream.comments || []).forEach(c => {
+            commentsHTML += `<p class="comment">💬 ${c}</p>`;
+        });
+
+        card.innerHTML = `
+            <div class="dream-header">
+                <strong>@Dreamer</strong>
+            </div>
+
+            <p>${dream.text}</p>
+
+            <button onclick="likeDream(${index})">
+                ❤️ ${dream.likes || 0}
+            </button>
+
+            <div class="comment-box">
+                ${commentsHTML}
+                <input id="comment-input-${index}" placeholder="Comment">
+                <button onclick="addComment(${index})">Post</button>
+            </div>
+        `;
+
+        feed.prepend(card);
+    });
+}
+
+renderDreams();
+</script>
+
+</body>
+</html>

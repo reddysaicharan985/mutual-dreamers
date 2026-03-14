@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Explore Dreams - Mutual Dreamers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <h2>🌙 Mutual Dreamers</h2>
+    <div>
+        <button onclick="location.href='index.html'">Home</button>
+        <button onclick="location.href='login.html'">Login</button>
+    </div>
+</header>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <a href="index.html">🏠 Home</a>
+        <a href="explore.html">🌙 Dreams</a>
+        <a href="#">🤝 Connections</a>
+        <a href="create.html">➕ Create</a>
+        <a href="profile.html" class="sidebar-link">👤 Your Profile</a>
+        <a href="#">🚀 Dream Boat</a>
+    </aside>
+
+    <main class="feed">
+        <h2>Explore Shared Dreams</h2>
+        <button onclick="location.href='create.html'">+ Create Dream</button>
+        <div id="dreamContainer"></div>
+    </main>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+    getFirestore, collection, doc,
+    updateDoc, deleteDoc,
+    arrayUnion, increment,
+    getDoc, arrayRemove,
+    orderBy, query, onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAiPbhvf8g0rugp2ezoDSMkgF81IOHJ_Xg",
+  authDomain: "mutual-dreamers.firebaseapp.com",
+  projectId: "mutual-dreamers",
+  storageBucket: "mutual-dreamers.firebasestorage.app",
+  messagingSenderId: "520139245009",
+  appId: "1:520139245009:web:a0978c20feb41e99584cf0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, (user) => {
+
+if (user) {
+
+console.log("User still logged in:", user.email);
+
+} else {
+
+window.location.href = "login.html";
+
+}
+
+});
+const db = getFirestore(app);
+
+let currentUser = null;
+const container = document.getElementById("dreamContainer");
+
+/* ================= AUTH STATE ================= */
+
+onAuthStateChanged(auth, (user) => {
+
+    if(user){
+        currentUser = user;
+    }else{
+        currentUser = null;
+    }
+
+    loadDreams();
+});
+
+/* ================= LOAD DREAMS ================= */
+
+function loadDreams() {
+
+    container.innerHTML = "<h3>Loading dreams...</h3>";
+
+    const q = query(collection(db, "dreams"), orderBy("createdAt", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+
+        container.innerHTML = "";
+
+        snapshot.forEach((docSnap) => {
+
+            const dream = docSnap.data();
+            const dreamId = docSnap.id;
+
+            const date = dream.createdAt?.toDate
+                ? dream.createdAt.toDate()
+                : new Date();
+
+            let ownerButtons = "";
+            let connectButton = "";
+
+            if (currentUser && currentUser.uid === dream.userId) {
+                ownerButtons = `
+                    <button onclick="editDream('${dreamId}')" style="background:#444;">✏ Edit</button>
+                    <button onclick="deleteDream('${dreamId}')" style="background:#8b0000;">🗑 Delete</button>
+                `;
+            } else {
+                connectButton = `<button class="connect-btn">Connect</button>`;
+            }
+
+            const commentsHTML = (dream.comments || []).slice().reverse().map(c => `
+    <div class="comment">
+        <strong>${c.user}</strong>: ${c.text}
+    </div>
+`).join("");
+
+            container.innerHTML += `
+<div class="dream-card">
+
+    <div class="dream-header">
+        <div>
+            <strong>${dream.title}</strong><br>
+            <span class="dream-author">by ${dream.dreamer}</span>
+        </div>
+        ${connectButton}
+    </div>
+
+    <div style="font-size:12px; opacity:0.7;">
+        ${date.toLocaleString()}
+    </div>
+
+    ${dream.type === "voice" ? `
+<audio controls style="width:100%; margin-top:10px;">
+    <source src="${dream.voiceData || dream.voiceURL}" type="audio/webm">
+</audio>
+` : `
+<p class="dream-content">
+${dream.content || ""}
+</p>
+`}
+
+   <div class="actions">
+    <button 
+        onclick="likeDream('${dreamId}')"
+        data-id="${dreamId}"
+        data-likes="${dream.likes || 0}">
+        ❤️ Like (${dream.likes || 0})
+    </button>
+
+    ${ownerButtons}
+</div>
+
+    <div class="comment-box">
+    <input type="text" id="commentInput-${dreamId}" placeholder="Write comment...">
+    <button onclick="addComment('${dreamId}')">Comment</button>
+</div>
+
+<button class="show-comments" onclick="toggleComments('${dreamId}', this)">
+    Show comments
+</button>
+
+<div class="comments-list" id="comments-${dreamId}">
+    ${commentsHTML}
+</div>
+
+</div>
+`;
+        });
+
+    });
+}
+
+/* ================= LIKE ================= */
+
+window.likeDream = async function(dreamId) {
+
+    if (!currentUser) {
+        alert("Login required");
+        return;
+    }
+
+    const dreamRef = doc(db, "dreams", dreamId);
+    const snap = await getDoc(dreamRef);
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    const likedBy = data.likedBy || [];
+
+    const btn = document.querySelector(`button[data-id="${dreamId}"]`);
+    let likes = parseInt(btn.dataset.likes || "0");
+
+    if (likedBy.includes(currentUser.uid)) {
+        await updateDoc(dreamRef, {
+            likes: increment(-1),
+            likedBy: arrayRemove(currentUser.uid)
+        });
+        likes--;
+    } else {
+        await updateDoc(dreamRef, {
+            likes: increment(1),
+            likedBy: arrayUnion(currentUser.uid)
+        });
+        likes++;
+    }
+
+    btn.dataset.likes = likes;
+    btn.innerText = `❤️ Like (${likes})`;
+};
+
+/* ================= COMMENT ================= */
+
+window.addComment = async function(dreamId) {
+
+    if (!currentUser) {
+        alert("Login required");
+        return;
+    }
+
+    const input = document.getElementById(`commentInput-${dreamId}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    const dreamRef = doc(db, "dreams", dreamId);
+
+    await updateDoc(dreamRef, {
+        comments: arrayUnion({
+            user: currentUser.displayName || "User",
+            text: text,
+            time: new Date()
+        })
+    });
+
+    input.value = "";
+};
+
+/* ================= DELETE ================= */
+
+window.deleteDream = async function(dreamId) {
+    if (!confirm("Are you sure?")) return;
+    await deleteDoc(doc(db, "dreams", dreamId));
+};
+
+/* ================= EDIT ================= */
+
+window.editDream = async function(dreamId) {
+    const dreamRef = doc(db, "dreams", dreamId);
+    const snap = await getDoc(dreamRef);
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    const newTitle = prompt("Edit title:", data.title);
+    const newContent = prompt("Edit content:", data.content);
+
+    if (!newTitle || !newContent) return;
+
+    await updateDoc(dreamRef, {
+        title: newTitle,
+        content: newContent
+    });
+};
+
+/* ================= READ TOGGLE ================= */
+
+window.toggleRead = function(dreamId) {
+    const content = document.querySelector(`p[data-id="${dreamId}"]`);
+    if (content) {
+        content.classList.toggle("collapsed");
+    }
+};
+
+window.toggleComments = function(dreamId, btn){
+
+    const box = document.getElementById(`comments-${dreamId}`);
+
+    if(!box) return;
+
+    if(box.style.display === "none" || box.style.display === ""){
+        box.style.display = "block";
+        btn.innerText = "Hide comments";
+    }else{
+        box.style.display = "none";
+        btn.innerText = "Show comments";
+    }
+
+};
+
+</script>
+
+</body>
+</html>

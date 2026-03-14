@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - Mutual Dreamers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="profile-container">
+
+    <h2>👤 Dreamer Profile</h2>
+
+    <!-- PROFILE INFO DISPLAY -->
+    <div class="profile-header">
+        <p><strong>Name:</strong> <span id="displayName">Not Set</span></p>
+        <p><strong>Dreamer ID:</strong> <span id="displayId">Not Set</span></p>
+        <p><strong>Country:</strong> <span id="displayCountry">Not Set</span></p>
+
+        <button id="connectBtn">🔗 Connect</button>
+        <p id="connectionStatus"></p>
+    </div>
+
+    <hr>
+
+    <!-- PROFILE FORM -->
+    <form id="profileForm">
+        <label>Name:</label>
+        <input type="text" id="name" required>
+
+        <label>Dreamer ID:</label>
+        <input type="text" id="dreamerId" required>
+
+        <label>Country:</label>
+        <select id="country">
+            <option>India</option>
+            <option>USA</option>
+            <option>UK</option>
+            <option>Canada</option>
+            <option>Australia</option>
+            <option>Germany</option>
+            <option>France</option>
+            <option>Japan</option>
+        </select>
+
+        <button type="submit">Save Profile</button>
+    </form>
+
+    <hr>
+
+    <!-- STATS SECTION -->
+    <div class="stats">
+        <p>🌙 Total Stories: <span id="storyCount">0</span></p>
+        <p>👥 Followers: <span id="followersCount">0</span></p>
+        <p>➡ Following: <span id="followingCount">0</span></p>
+    </div>
+
+    <hr>
+
+    <!-- FOLLOWERS LIST -->
+    <div>
+        <h3>Followers</h3>
+        <ul id="followersList"></ul>
+    </div>
+
+    <div>
+        <h3>Following</h3>
+        <ul id="followingList"></ul>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

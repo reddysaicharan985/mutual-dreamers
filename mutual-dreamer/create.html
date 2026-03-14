@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Dream - Mutual Dreamers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <h2>🌙 Mutual Dreamers</h2>
+    <div>
+        <button onclick="location.href='index.html'">Home</button>
+        <button onclick="location.href='explore.html'">Explore</button>
+    </div>
+</header>
+
+
+<div class="create-box">
+    <h2>Share Your Dream</h2>
+    <input type="text" id="dreamerName" placeholder="Your Dreamer ID"><br>
+
+    <input type="text" id="dreamTitle" placeholder="Dream Title"><br>
+    <textarea id="dreamContent" placeholder="Describe your dream..." rows="6"></textarea><br>
+
+    <button onclick="postDream()">Post Dream</button>
+</div>
+
+    <!-- ===== DREAM VOICE SECTION ===== -->
+ 
+<div class="dream-box">
+
+<h3>🎤 Share Your Dream Voice</h3>
+
+<input type="text" placeholder="Your Dreamer ID">
+
+<input type="text" placeholder="Dream Title">
+
+<button id="recordBtn">🎤 Start Recording</button>
+
+<div id="wave" class="voice-wave">
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+</div>
+
+<br>
+
+<audio id="audioPlayback" controls></audio>
+
+<br><br>
+
+<button id="postVoiceBtn">Post Dream</button>
+
+<button id="deleteBtn">Delete</button>
+
+</div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyAiPbhvf8g0rugp2ezoDSMkgF81IOHJ_Xg",
+  authDomain: "mutual-dreamers.firebaseapp.com",
+  projectId: "mutual-dreamers",
+  storageBucket: "mutual-dreamers.firebasestorage.app",
+  messagingSenderId: "520139245009",
+  appId: "1:520139245009:web:a0978c20feb41e99584cf0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+
+if (!user) {
+window.location.href = "login.html";
+}
+
+});
+const db = getFirestore(app);
+
+window.postDream = async function () {
+
+    let dreamer = document.getElementById("dreamerName").value.trim();
+    let title = document.getElementById("dreamTitle").value.trim();
+    let content = document.getElementById("dreamContent").value.trim();
+    const user = auth.currentUser;
+
+    if (!dreamer || !title || !content) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    if (!user) {
+        alert("Login required.");
+        return;
+    }
+
+    try {
+        await addDoc(collection(db, "dreams"), {
+            dreamer: dreamer,
+            title: title,
+            content: content,
+            userId: user.uid,
+            username: user.displayName || "Anonymous",
+            likes: 0,
+            comments: [],
+            createdAt: serverTimestamp()
+        });
+
+        window.location.href = "explore.html";
+
+    } catch (error) {
+        alert(error.message);
+    }
+};
+
+/* ===== VOICE RECORDING ===== */
+
+let recorder;
+let audioChunks = [];
+
+const recordBtn = document.getElementById("recordBtn");
+const audioPlayback = document.getElementById("audioPlayback");
+const deleteBtn = document.getElementById("deleteBtn");
+const postBtn = document.getElementById("postVoiceBtn");
+
+const waveBars = document.querySelectorAll("#wave span");
+
+function startWave(){
+waveBars.forEach(bar=>{
+bar.style.animationPlayState="running";
+});
+}
+
+function stopWave(){
+waveBars.forEach(bar=>{
+bar.style.animationPlayState="paused";
+});
+}
+
+recordBtn.onclick = async () => {
+
+const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+
+recorder = new MediaRecorder(stream);
+
+recorder.start();
+
+startWave();
+
+audioChunks = [];
+
+recorder.ondataavailable = e =>{
+audioChunks.push(e.data);
+};
+
+recorder.onstop = ()=>{
+
+stopWave();
+
+const audioBlob = new Blob(audioChunks);
+
+const audioUrl = URL.createObjectURL(audioBlob);
+
+audioPlayback.src = audioUrl;
+
+};
+
+setTimeout(()=>{
+recorder.stop();
+},5000);
+
+};
+
+deleteBtn.onclick = ()=>{
+audioPlayback.src="";
+};
+
+postBtn.onclick = async ()=>{
+
+if(audioChunks.length === 0){
+alert("Please record a voice dream first.");
+return;
+}
+
+try{
+
+const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+const reader = new FileReader();
+
+reader.readAsDataURL(audioBlob);
+
+reader.onloadend = async function(){
+
+const base64Audio = reader.result;
+
+await addDoc(collection(db,"dreams"),{
+type:"voice",
+voiceData: base64Audio,
+createdAt:serverTimestamp()
+});
+
+alert("Voice Dream Posted 🌙");
+
+window.location.href="explore.html";
+
+};
+
+}catch(error){
+alert(error.message);
+}
+
+};
+
+</script>
+
+
+
+</body>
+</html>

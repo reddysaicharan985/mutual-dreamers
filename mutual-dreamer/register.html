@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - Mutual Dreamers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <h2>🌙 Mutual Dreamers</h2>
+    <div>
+        <button onclick="location.href='login.html'">Login</button>
+        <button onclick="location.href='index.html'">Home</button>
+    </div>
+</header>
+
+<div class="login-page">
+    <div class="login-box">
+        <h2>Create Your Account</h2>
+
+        <input type="text" id="username" placeholder=" Create Dreamer ID"><br>
+        <input type="email" id="email" placeholder="Email"><br>
+        <input type="password" id="password" placeholder="Password"><br>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password"><br>
+
+
+        <button id="registerBtn">Register</button>
+
+        <br><br>
+
+        <button id="googleRegisterBtn" style="background:#db4437; color:white;">
+            Sign up with Google
+        </button>
+
+        <p class="note">
+            Already have an account?
+            <a href="login.html" style="color:#4da6ff;">Login</a>
+        </p>
+    </div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAiPbhvf8g0rugp2ezoDSMkgF81IOHJ_Xg",
+  authDomain: "mutual-dreamers.firebaseapp.com",
+  projectId: "mutual-dreamers",
+  storageBucket: "mutual-dreamers.firebasestorage.app",
+  messagingSenderId: "520139245009",
+  appId: "1:520139245009:web:a0978c20feb41e99584cf0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if (!username || !email || !password || !confirmPassword) {
+        alert("All fields are required.");
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        alert("RECHECK YOUR GMAIL AND PASSWORD");
+        return;
+    }
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Save username in Firebase profile
+        await updateProfile(userCredential.user, {
+            displayName: username
+        });
+
+        alert("Account Created Successfully!");
+        window.location.href = "explore.html";
+
+    } catch (error) {
+        alert(error.message);
+    }
+
+});
+
+</script>
+
+</body>
+</html>

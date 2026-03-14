@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mutual Dreamers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+    <h2>🌙 Mutual Dreamers</h2>
+
+    <div>
+        <button onclick="location.href='login.html'">Login</button>
+        <button onclick="location.href='register.html'">Signup</button>
+    </div>
+</header>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-premium">
+
+    <div class="stars"></div>
+
+    <div class="hero-center">
+        <h1>Your Dreams Deserve a Dimension.</h1>
+
+        <p>
+            Share your subconscious visions.
+            Connect with dream twins.
+            Soon — visualize them through AI.
+        </p>
+
+        <div class="hero-buttons">
+            <button class="primary-btn" onclick="openModal()">
+                Enter Dream Dimension
+            </button>
+
+            <button class="secondary-btn" onclick="openModal()">
+                Explore Dreams
+            </button>
+        </div>
+    </div>
+
+</section>
+
+<!-- ===== VISION SECTION ===== -->
+
+
+<!-- ===== FEATURES ===== -->
+<section class="features-section">
+
+    <h2 class="section-title">Core Dimensions</h2>
+
+    <div class="features-grid">
+
+        <div class="feature-card">
+            <h3>🔮 Dream Sharing</h3>
+            <p>
+                Express raw dreams without filters.
+                A safe space for imagination.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🌌 Dream Twin Discovery</h3>
+            <p>
+                Discover others who saw similar visions.
+                Build subconscious resonance.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🎥 AI Visualization</h3>
+            <p>
+                Soon transform dreams into cinematic visuals.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ====== FOUNDER SECTION ====== -->
+<section class="founder-section">
+
+    <div class="founder-container">
+
+        <img src="founder.jpg" 
+             alt="Founder - Sai Charan" 
+             class="founder-img">
+
+        <div class="founder-text">
+            <h2>Message From The Founder</h2>
+
+            <p>
+                I'm <strong>Mukkara Sai Charan Reddy</strong>, Every night the human mind enters a universe we barely understand.
+A place where time bends, reality fades, and imagination becomes experience.
+Mutual Dreamers was created to give those moments a place to exist beyond sleep.
+Because dreams are not meaningless — they are unexplored dimensions of the mind.
+            </p>
+
+            <p>
+                Through <strong>Unknown Reality Psychology</strong>,
+                this platform connects imagination with shared human experience.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+
+    <div class="footer-content">
+        <h3>🌙 Mutual Dreamers</h3>
+
+        <p>
+            A shared subconscious network.
+        </p>
+
+        <div class="footer-links">
+            <a href="#">About</a>
+            <a href="#">Vision</a>
+            <a href="#">Contact</a>
+        </div>
+
+        <p class="copyright">
+            © 2026 Mutual Dreamers — Created by Mukkara Sai Charan Reddy <br>
+        All Rights Reserved.
+        </p>
+    </div>
+
+</footer>
+
+<!-- ================= AUTH MODAL ================= -->
+<div id="authModal" class="auth-modal">
+    <div class="auth-box">
+        <span class="close-btn" onclick="closeModal()">×</span>
+
+        <h2>Welcome Dreamer</h2>
+        <p>Login or create account to enter the dream dimension</p>
+
+        <button onclick="location.href='login.html'" class="modal-btn">
+            Login
+        </button>
+
+        <button onclick="location.href='register.html'" class="modal-btn">
+            Register
+        </button>
+    </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+function openModal() {
+    document.getElementById("authModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("authModal").style.display = "none";
+}
+
+</script>
+
+</body>
+</html>
